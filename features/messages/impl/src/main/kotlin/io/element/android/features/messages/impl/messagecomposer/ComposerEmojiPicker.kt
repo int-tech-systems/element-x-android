@@ -59,6 +59,7 @@ internal fun ComposerEmojiPicker(
                 onSelectEmoji = { emoji -> state.eventSink(MessageComposerEvent.InsertEmoji(emoji.unicode)) },
                 selectedEmojis = persistentSetOf(),
                 modifier = Modifier.fillMaxSize(),
+                compact = true,
             )
             // Loading
             else -> CircularProgressIndicator()

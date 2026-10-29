@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.emojibasebindings.Emoji
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -52,9 +53,11 @@ internal fun EmojiPickerView(
     onSelectEmoji: (Emoji) -> Unit,
     selectedEmojis: ImmutableSet<String>,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
     contentDescription: @Composable (emoji: Emoji, isSelected: Boolean) -> String = { emoji, _ -> emoji.unicode },
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val grid = if (compact) CompactEmojiGrid else DefaultEmojiGrid
     val pagerState = rememberPagerState(pageCount = { state.categories.size })
     var skinPickerEmoji by remember { mutableStateOf<Emoji?>(null) }
 
@@ -76,6 +79,7 @@ internal fun EmojiPickerView(
                 skinPickerEmoji = skinPickerEmoji,
                 onDismissSkinPicker = { skinPickerEmoji = null },
                 selectedEmojis = selectedEmojis,
+                grid = grid,
                 contentDescription = contentDescription,
             )
         }
@@ -119,12 +123,48 @@ internal fun EmojiPickerView(
                     skinPickerEmoji = skinPickerEmoji,
                     onDismissSkinPicker = { skinPickerEmoji = null },
                     selectedEmojis = selectedEmojis,
+                    grid = grid,
                     contentDescription = contentDescription,
                 )
             }
         }
     }
 }
+
+/**
+ * Geometry defining each cell of the emoji grid.
+ */
+private data class EmojiGrid(
+    val cellSize: Dp,
+    val emojiSize: Dp,
+    val horizontalSpacing: Dp,
+    val verticalSpacing: Dp,
+    val horizontalPadding: Dp,
+    val verticalPadding: Dp,
+)
+
+/** Reaction picker and status picker: 6 columns when the screen is 393 dp wide. */
+private val DefaultEmojiGrid = EmojiGrid(
+    cellSize = 48.dp,
+    emojiSize = 32.dp,
+    horizontalSpacing = 8.dp,
+    verticalSpacing = 2.dp,
+    horizontalPadding = 16.dp,
+    verticalPadding = 10.dp,
+)
+
+/**
+ * Composer picker: 9 columns when the screen is 393 dp wide, roughly matching keyboard layouts. The composer already applies 16 dp
+ * of padding on each side of the picker, so the grid carries no horizontal padding of its own.
+ */
+private val CompactEmojiGrid = EmojiGrid(
+    cellSize = 40.dp,
+    emojiSize = 26.dp,
+    horizontalSpacing = 0.dp,
+    verticalSpacing = 0.dp,
+    horizontalPadding = 0.dp,
+    verticalPadding = 4.dp,
+)
 
 @Composable
 private fun EmojiResults(
@@ -135,14 +175,15 @@ private fun EmojiResults(
     skinPickerEmoji: Emoji?,
     onDismissSkinPicker: () -> Unit,
     selectedEmojis: ImmutableSet<String>,
+    grid: EmojiGrid,
     contentDescription: @Composable (emoji: Emoji, isSelected: Boolean) -> String,
 ) {
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
-        columns = GridCells.Adaptive(minSize = 48.dp),
-        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        columns = GridCells.Adaptive(minSize = grid.cellSize),
+        contentPadding = PaddingValues(vertical = grid.verticalPadding, horizontal = grid.horizontalPadding),
+        horizontalArrangement = Arrangement.spacedBy(grid.horizontalSpacing),
+        verticalArrangement = Arrangement.spacedBy(grid.verticalSpacing)
     ) {
         items(emojis, key = { it.unicode }) { item ->
             EmojiItem(
@@ -153,7 +194,7 @@ private fun EmojiResults(
                 onLongPress = onLongPress,
                 skinPickerEmoji = skinPickerEmoji,
                 onDismissSkinPicker = onDismissSkinPicker,
-                emojiSize = 32.dp.toSp(),
+                emojiSize = grid.emojiSize.toSp(),
                 selectedSkinUnicodes = selectedEmojis,
                 hasSelectedSkin = item.skins?.any { skin -> skin.unicode in selectedEmojis } == true,
                 contentDescription = contentDescription,

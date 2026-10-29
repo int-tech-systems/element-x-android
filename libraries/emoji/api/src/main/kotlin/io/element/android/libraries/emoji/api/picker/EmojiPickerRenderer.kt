@@ -27,6 +27,7 @@ interface EmojiPickerRenderer {
      * @param onSelectEmoji invoked when the user taps an emoji (including a skin-tone variant).
      * @param selectedEmojis emojis to visually mark as already selected.
      * @param modifier layout modifier for the picker container.
+     * @param compact true enables a tighter layout using smaller emojis, intended for pickers that sit in limited space such as the area under the composer.
      * @param contentDescription accessibility label for each emoji cell.
      */
     @Composable
@@ -35,6 +36,7 @@ interface EmojiPickerRenderer {
         onSelectEmoji: (Emoji) -> Unit,
         selectedEmojis: ImmutableSet<String>,
         modifier: Modifier = Modifier,
+        compact: Boolean = false,
         contentDescription: @Composable (Emoji, Boolean) -> String = { emoji, _ -> emoji.unicode },
     )
 }
@@ -46,6 +48,7 @@ object NoOpEmojiPickerRenderer : EmojiPickerRenderer {
         onSelectEmoji: (Emoji) -> Unit,
         selectedEmojis: ImmutableSet<String>,
         modifier: Modifier,
+        compact: Boolean,
         contentDescription: @Composable (Emoji, Boolean) -> String,
     ) = Unit
 }
