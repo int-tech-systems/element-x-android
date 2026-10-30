@@ -28,6 +28,7 @@ interface EmojiPickerRenderer {
      * @param selectedEmojis emojis to visually mark as already selected.
      * @param modifier layout modifier for the picker container.
      * @param compact true enables a tighter layout using smaller emojis, intended for pickers that sit in limited space such as the area under the composer.
+     * @param onBackspace when supplied, the picker displays a backspace key that calls it, so a picker standing in for the keyboard can also delete.
      * @param contentDescription accessibility label for each emoji cell.
      */
     @Composable
@@ -37,6 +38,7 @@ interface EmojiPickerRenderer {
         selectedEmojis: ImmutableSet<String>,
         modifier: Modifier = Modifier,
         compact: Boolean = false,
+        onBackspace: (() -> Unit)? = null,
         contentDescription: @Composable (Emoji, Boolean) -> String = { emoji, _ -> emoji.unicode },
     )
 }
@@ -49,6 +51,7 @@ object NoOpEmojiPickerRenderer : EmojiPickerRenderer {
         selectedEmojis: ImmutableSet<String>,
         modifier: Modifier,
         compact: Boolean,
+        onBackspace: (() -> Unit)?,
         contentDescription: @Composable (Emoji, Boolean) -> String,
     ) = Unit
 }

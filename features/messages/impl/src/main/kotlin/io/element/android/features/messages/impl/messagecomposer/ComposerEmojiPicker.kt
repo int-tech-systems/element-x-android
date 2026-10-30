@@ -60,6 +60,7 @@ internal fun ComposerEmojiPicker(
                 selectedEmojis = persistentSetOf(),
                 modifier = Modifier.fillMaxSize(),
                 compact = true,
+                onBackspace = { state.eventSink(MessageComposerEvent.DeleteBackward) },
             )
             // Loading
             else -> CircularProgressIndicator()
